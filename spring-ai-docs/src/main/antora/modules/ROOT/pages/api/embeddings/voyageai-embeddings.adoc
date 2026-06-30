@@ -1,0 +1,181 @@
+= Voyage AI Embeddings
+
+Spring AI supports Voyage AI text embedding models.
+Embeddings are vector representations of text that capture semantic meaning for search, clustering, and retrieval tasks.
+
+== Available Models
+
+Voyage AI provides several embedding models optimized for different use cases:
+
+[cols="2,2,4", stripes=even]
+|====
+| Model | Dimensions | Description
+
+| `voyage-3`
+| 1024
+| General-purpose embedding model for semantic search and RAG.
+
+| `voyage-3-lite`
+| 512
+| Lightweight general-purpose embedding model.
+
+| `voyage-code-3`
+| 1024
+| Code-optimized embedding model.
+
+| `voyage-code-2`
+| 1536
+| Code embedding model for code search and RAG.
+
+| `voyage-2`
+| 1024
+| General-purpose embedding model (previous generation).
+
+| `voyage-finance-2`
+| 1024
+| Finance domain embedding model.
+
+| `voyage-law-2`
+| 1024
+| Legal domain embedding model.
+|====
+
+== Prerequisites
+
+Create an account at https://www.voyageai.com/ and generate an API key from the Voyage AI dashboard.
+
+Set the `spring.ai.voyageai.api-key` configuration property:
+
+[source,properties]
+----
+spring.ai.voyageai.api-key=<your-voyageai-api-key>
+----
+
+For enhanced security, reference an environment variable:
+
+[source,yaml]
+----
+spring:
+  ai:
+    voyageai:
+      api-key: ${VOYAGE_AI_API_KEY}
+----
+
+== Auto-configuration
+
+Spring AI provides Spring Boot auto-configuration for the Voyage AI Embedding Model.
+Add the following dependency to your Maven `pom.xml`:
+
+[source, xml]
+----
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-voyage-ai</artifactId>
+</dependency>
+----
+
+or to your Gradle `build.gradle`:
+
+[source,groovy]
+----
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-starter-model-voyage-ai'
+}
+----
+
+TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+
+=== Connection Properties
+
+[cols="3,5,1", stripes=even]
+|====
+| Property | Description | Default
+
+| spring.ai.voyageai.base-url | The URL to connect to | https://api.voyageai.com
+| spring.ai.voyageai.api-key | The API Key | -
+|====
+
+=== Configuration Properties
+
+Enabling and disabling of the embedding auto-configurations are configured via top level properties with the prefix `spring.ai.model.embedding`.
+
+To enable: `spring.ai.model.embedding=voyageai` (enabled by default when the starter is present)
+
+To disable: `spring.ai.model.embedding=none`
+
+[cols="3,5,1", stripes=even]
+|====
+| Property | Description | Default
+
+| spring.ai.model.embedding | Enable Voyage AI embedding model | voyageai
+| spring.ai.voyageai.embedding.base-url | Optional override of common base URL | -
+| spring.ai.voyageai.embedding.api-key | Optional override of common API key | -
+| spring.ai.voyageai.embedding.metadata-mode | Document content extraction mode | EMBED
+| spring.ai.voyageai.embedding.model | The model to use | voyage-3
+| spring.ai.voyageai.embedding.input-type | Optional input type hint (`query` or `document`) | -
+|====
+
+== Runtime Options [[embedding-options]]
+
+The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-voyage-ai/src/main/java/org/springframework/ai/voyageai/VoyageAiEmbeddingOptions.java[VoyageAiEmbeddingOptions.java] provides Voyage AI configuration such as model name and input type.
+
+At run-time you can override default options using a `VoyageAiEmbeddingOptions` instance in your `EmbeddingRequest`:
+
+[source,java]
+----
+EmbeddingResponse response = embeddingModel.call(
+    new EmbeddingRequest(List.of("search query"),
+        VoyageAiEmbeddingOptions.builder()
+            .model("voyage-3")
+            .inputType("query")
+            .build()));
+----
+
+== Sample Controller
+
+[source,application.properties]
+----
+spring.ai.voyageai.api-key=YOUR_API_KEY
+spring.ai.voyageai.embedding.model=voyage-3
+----
+
+[source,java]
+----
+@RestController
+public class EmbeddingController {
+
+    private final EmbeddingModel embeddingModel;
+
+    @Autowired
+    public EmbeddingController(EmbeddingModel embeddingModel) {
+        this.embeddingModel = embeddingModel;
+    }
+
+    @GetMapping("/ai/embedding")
+    public Map embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+        var embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
+        return Map.of("embedding", embeddingResponse);
+    }
+}
+----
+
+== Manual Configuration
+
+If you are not using Spring Boot, add the `spring-ai-voyage-ai` dependency and configure the model manually:
+
+[source,java]
+----
+var voyageAiApi = VoyageAiApi.builder()
+    .apiKey(System.getenv("VOYAGE_AI_API_KEY"))
+    .build();
+
+var embeddingModel = VoyageAiEmbeddingModel.builder()
+    .voyageAiApi(voyageAiApi)
+    .options(VoyageAiEmbeddingOptions.builder()
+        .model("voyage-3")
+        .build())
+    .build();
+
+EmbeddingResponse embeddingResponse = embeddingModel
+    .embedForResponse(List.of("Hello World", "World is big and salvation is near"));
+----

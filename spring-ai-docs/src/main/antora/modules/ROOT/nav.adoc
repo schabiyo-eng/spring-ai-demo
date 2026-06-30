@@ -39,6 +39,7 @@
 **** xref:api/embeddings/azure-openai-embeddings.adoc[Azure OpenAI]
 **** xref:api/embeddings/google-genai-embeddings-text.adoc[Google GenAI Text Embedding]
 **** xref:api/embeddings/mistralai-embeddings.adoc[Mistral AI]
+**** xref:api/embeddings/voyageai-embeddings.adoc[Voyage AI]
 **** xref:api/embeddings/oci-genai-embeddings.adoc[OCI GenAI]
 **** xref:api/embeddings/ollama-embeddings.adoc[Ollama]
 **** xref:api/embeddings/onnx.adoc[(ONNX) Transformers]
