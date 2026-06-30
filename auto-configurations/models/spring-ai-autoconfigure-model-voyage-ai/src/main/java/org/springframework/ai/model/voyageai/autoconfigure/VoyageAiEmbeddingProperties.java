@@ -20,7 +20,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.voyageai.VoyageAiEmbeddingOptions;
-import org.springframework.ai.voyageai.api.VoyageAiApi;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 
@@ -36,10 +35,6 @@ public class VoyageAiEmbeddingProperties extends VoyageAiParentProperties {
 	public static final String CONFIG_PREFIX = "spring.ai.voyageai.embedding";
 
 	public MetadataMode metadataMode = MetadataMode.EMBED;
-
-	public VoyageAiEmbeddingProperties() {
-		super.setBaseUrl(VoyageAiApi.DEFAULT_BASE_URL);
-	}
 
 	public MetadataMode getMetadataMode() {
 		return this.metadataMode;

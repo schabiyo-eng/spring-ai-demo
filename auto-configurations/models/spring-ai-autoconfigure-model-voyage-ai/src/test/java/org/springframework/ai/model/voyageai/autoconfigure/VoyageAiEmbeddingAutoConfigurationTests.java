@@ -66,7 +66,31 @@ class VoyageAiEmbeddingAutoConfigurationTests {
 
 				assertThat(embeddingProperties.getModel()).isEqualTo("voyage-3-lite");
 				assertThat(embeddingProperties.getInputType()).isEqualTo("query");
+				assertThat(embeddingProperties.getBaseUrl()).isNull();
 				assertThat(commonProperties.getBaseUrl()).isEqualTo("TEST_BASE_URL");
+				assertThat(context.getBeansOfType(VoyageAiEmbeddingModel.class)).isNotEmpty();
+			});
+	}
+
+	@Test
+	void commonBaseUrlUsedWhenEmbeddingBaseUrlUnset() {
+		this.embeddingContextRunner.withPropertyValues("spring.ai.voyageai.base-url=CUSTOM_COMMON_URL").run(context -> {
+			assertThat(context.getBean(VoyageAiEmbeddingProperties.class).getBaseUrl()).isNull();
+			assertThat(context.getBean(VoyageAiCommonProperties.class).getBaseUrl()).isEqualTo("CUSTOM_COMMON_URL");
+			assertThat(context.getBeansOfType(VoyageAiEmbeddingModel.class)).isNotEmpty();
+		});
+	}
+
+	@Test
+	void embeddingBaseUrlOverridesCommonBaseUrl() {
+		this.embeddingContextRunner
+			.withPropertyValues("spring.ai.voyageai.base-url=CUSTOM_COMMON_URL",
+					"spring.ai.voyageai.embedding.base-url=CUSTOM_EMBEDDING_URL")
+			.run(context -> {
+				assertThat(context.getBean(VoyageAiEmbeddingProperties.class).getBaseUrl())
+					.isEqualTo("CUSTOM_EMBEDDING_URL");
+				assertThat(context.getBean(VoyageAiCommonProperties.class).getBaseUrl()).isEqualTo("CUSTOM_COMMON_URL");
+				assertThat(context.getBeansOfType(VoyageAiEmbeddingModel.class)).isNotEmpty();
 			});
 	}
 
